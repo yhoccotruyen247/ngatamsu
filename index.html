@@ -281,7 +281,28 @@
     var currentTab = "video";
     var currentIndex = 0;
     var currentFilter = "pending"; // MẶC ĐỊNH LUÔN LÀ CHƯA ĐĂNG THEO YÊU CẦU
-    var doneStorage = JSON.parse(localStorage.getItem("phuc_done_items") || "{}");
+    var statusSyncPending = false;
+    function callPostingApi(action, params, callback) {
+      if (!WEB_APP_URL || WEB_APP_URL.indexOf("https://") !== 0) { callback(new Error("Web App URL chưa được cấu hình.")); return; }
+      var callbackName = "postingStatusCallback_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
+      var script = document.createElement("script");
+      var finished = false;
+      var timeoutId = setTimeout(function() { finish(new Error("Apps Script không phản hồi.")); }, 150000);
+      function finish(error, result) {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeoutId);
+        delete window[callbackName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+        callback(error, result);
+      }
+      window[callbackName] = function(result) { finish(null, result); };
+      script.onerror = function() { finish(new Error("Không kết nối được Apps Script.")); };
+      var query = ["action=" + encodeURIComponent(action), "callback=" + encodeURIComponent(callbackName), "_=" + Date.now()];
+      Object.keys(params || {}).forEach(function(key) { query.push(encodeURIComponent(key) + "=" + encodeURIComponent(params[key])); });
+      script.src = WEB_APP_URL + (WEB_APP_URL.indexOf("?") === -1 ? "?" : "&") + query.join("&");
+      document.head.appendChild(script);
+    }
 
     function getItems() {
       return currentTab === "video" ? VIDEO_ITEMS : IMAGE_ITEMS;
@@ -292,10 +313,7 @@
     }
 
     function isDone(item) {
-      if (!item) return false;
-      var k = getItemKey(item);
-      if (doneStorage[k] !== undefined) return doneStorage[k];
-      return String(item.status || "").toLowerCase().indexOf("đã đăng") !== -1;
+      return !!item && String(item.status || "").toLowerCase().indexOf("đã đăng") !== -1;
     }
 
     function extractDriveId(url) {
@@ -520,34 +538,29 @@
     }
 
     function toggleCurrentDone() {
+      if (statusSyncPending) return;
       var it = getItems()[currentIndex];
       if (!it) return;
-      var k = getItemKey(it);
-      var currentDone = isDone(it);
-      var newDone = !currentDone;
-
-      doneStorage[k] = newDone;
-      localStorage.setItem("phuc_done_items", JSON.stringify(doneStorage));
-
-      // Đồng bộ 2 chiều về Google Sheet
-      if (WEB_APP_URL && WEB_APP_URL.indexOf("http") === 0) {
-        var syncUrl = WEB_APP_URL + "?action=markPosted&type=" + currentTab + "&stt=" + it.stt + "&title=" + encodeURIComponent(it.title) + "&isDone=" + newDone;
-        fetch(syncUrl, { mode: "no-cors" }).catch(function(){});
-      }
-
-      if (newDone) {
-        showToast("✅ Đã chuyển sang: ĐÃ ĐĂNG BÀI");
-        // Khi ở bộ lọc "Chưa đăng", tự động chuyển sang bài chưa đăng tiếp theo
-        if (currentFilter === "pending") {
-          findAndSetFirstPendingIndex();
+      var newDone = !isDone(it);
+      var button = document.getElementById("btnMarkPosted");
+      statusSyncPending = true;
+      if (button) button.disabled = true;
+      showToast("⏳ Đang ghi trạng thái vào Google Sheet...");
+      callPostingApi("markPosted", { type: currentTab, stt: String(it.stt), title: it.title || "", isDone: String(newDone) }, function(error, result) {
+        statusSyncPending = false;
+        if (button) button.disabled = false;
+        if (error || !result || !result.success || !result.updated) {
+          var syncError = result && result.error ? result.error : (error && error.message ? error.message : "Không xác nhận được trạng thái từ Google Sheet.");
+          showToast("⚠️ " + syncError);
+          return;
         }
-      } else {
-        showToast("⚪ Đã chuyển lại: CHƯA ĐĂNG");
-      }
-
-      loadCurrentItem();
-      renderTable();
-      updateStats();
+        it.status = newDone ? "Đã đăng" : (currentTab === "image" ? "Đã làm ảnh" : "Đã làm video");
+        if (newDone && currentFilter === "pending") findAndSetFirstPendingIndex();
+        loadCurrentItem();
+        renderTable();
+        updateStats();
+        showToast(newDone ? "✅ Sheet đã ghi: ĐÃ ĐĂNG BÀI" : "⚪ Sheet đã ghi: CHƯA ĐĂNG");
+      });
     }
 
     function setFilter(f) {
