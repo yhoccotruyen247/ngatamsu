@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>TRẠM ĐĂNG BÀI • PHÚC HỌC ĐIỀU HAY</title>
+  <link rel="icon" type="image/png" href="Avatar.png">
+  <link rel="apple-touch-icon" href="Avatar.png">
+  <meta name="theme-color" content="#090d16">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-inner: #0d1322;
+      --border: #1f293d;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #f59e0b;
+      --emerald: #10b981;
+      --cyan: #06b6d4;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Plus Jakarta Sans", sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 10px; display: flex; justify-content: center; }
+    .app-container { width: 100%; max-width: 520px; background: var(--card-bg); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.06); }
+
+    /* HEADER */
+    header { background: linear-gradient(180deg, rgba(245, 158, 11, 0.16) 0%, rgba(17, 24, 39, 0) 100%); padding: 14px 16px 10px 16px; text-align: center; border-bottom: 1px solid var(--border); }
+    .brand-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 6px; }
+    .brand-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary); }
+    .header-title { font-size: 19px; font-weight: 900; background: linear-gradient(135deg, #fbbf24, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.2px; }
+    .header-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+    /* 2 TAB SWITCHER */
+    .tab-switcher { display: grid; grid-template-columns: 1fr 1fr; background: #090d16; margin: 10px 14px 4px 14px; border-radius: 14px; padding: 4px; border: 1px solid var(--border); gap: 6px; }
+    .tab-btn { border: none; background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 800; padding: 11px 8px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s; }
+    .tab-btn.active { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35); }
+    .tab-btn.tab-img.active { background: linear-gradient(135deg, #06b6d4, #0891b2); color: #fff; box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35); }
+
+    /* STATS & PROGRESS */
+    .stats-bar { display: flex; justify-content: space-between; align-items: center; padding: 6px 16px 2px 16px; font-size: 12px; color: var(--text-muted); font-weight: 700; }
+    .progress-bar-bg { width: 100%; height: 5px; background: rgba(255,255,255,0.06); border-radius: 6px; overflow: hidden; margin-top: 4px; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #10b981); width: 0%; transition: width 0.3s; }
+
+    /* ACTIVE CARD */
+    .current-card { margin: 10px 14px 12px 14px; background: var(--card-inner); border: 1px solid var(--border); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    
+    /* CARD HEADER */
+    .card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .stt-group { display: flex; align-items: center; gap: 8px; }
+    .badge-stt { font-size: 12px; font-weight: 900; background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 3px 9px; border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.35); font-family: 'JetBrains Mono', monospace; }
+    .badge-category { font-size: 11px; font-weight: 700; color: var(--text-muted); max-width: 170px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    
+    .nav-buttons { display: flex; align-items: center; gap: 6px; }
+    .btn-nav { background: #162035; border: 1px solid var(--border); color: #cbd5e1; font-size: 11.5px; font-weight: 800; padding: 4px 10px; border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+    .btn-nav:hover { background: #223150; color: #fff; }
+    .btn-nav:active { transform: scale(0.95); }
+
+    .current-title { font-size: 15.5px; font-weight: 800; color: #fff; line-height: 1.45; }
+
+    /* 5-ROW ACTION BUTTONS GRID */
+    .actions-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+    .btn-row-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    
+    .btn-act { height: 42px; border: none; border-radius: 12px; padding: 0 10px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.15s; user-select: none; }
+    .btn-act:active { transform: scale(0.97); }
+
+    /* ROW 1: XEM DRIVE & TẢI DRIVE */
+    .btn-view-drive { background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; }
+    .btn-view-drive:hover { background: rgba(56, 189, 248, 0.25); }
+    .btn-download-drive { background: rgba(16, 185, 129, 0.18); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; }
+    .btn-download-drive:hover { background: rgba(16, 185, 129, 0.28); }
+
+    /* ROW 2: CAPTION FB & BÌNH LUẬN */
+    .btn-copy-fb { background: rgba(24, 119, 242, 0.18); border: 1px solid rgba(24, 119, 242, 0.45); color: #60a5fa; }
+    .btn-copy-fb:hover { background: rgba(24, 119, 242, 0.28); }
+    .btn-copy-pinned { background: rgba(168, 85, 247, 0.18); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; }
+    .btn-copy-pinned:hover { background: rgba(168, 85, 247, 0.28); }
+
+    /* ROW 3: CAPTION TIKTOK & CAPTION ZALO */
+    .btn-copy-tiktok { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.35); color: #fb7185; }
+    .btn-copy-tiktok:hover { background: rgba(244, 63, 94, 0.25); }
+    .btn-copy-zalo { background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.35); color: #38bdf8; }
+    .btn-copy-zalo:hover { background: rgba(14, 165, 233, 0.25); }
+
+    /* ROW 4: YOUTUBE TIÊU ĐỀ & MÔ TẢ (HOẶC INSTA & PROMPT AI Ở TAB ẢNH) */
+    .btn-copy-yt-title { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; }
+    .btn-copy-yt-title:hover { background: rgba(245, 158, 11, 0.25); }
+    .btn-copy-yt-desc { background: rgba(203, 213, 225, 0.1); border: 1px solid var(--border); color: #cbd5e1; }
+    .btn-copy-yt-desc:hover { background: rgba(203, 213, 225, 0.18); }
+
+    /* ROW 5: NÚT ĐÁNH DẤU ĐÃ ĐĂNG - FULL WIDTH, NỔI BẬT */
+    .btn-mark-posted { width: 100%; height: 46px; border-radius: 13px; font-size: 13.5px; font-weight: 900; letter-spacing: 0.3px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; border: none; }
+    .btn-mark-posted.state-pending { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35); }
+    .btn-mark-posted.state-pending:hover { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+    .btn-mark-posted.state-done { background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.45); color: #34d399; }
+    .btn-mark-posted.state-done:hover { background: rgba(16, 185, 129, 0.3); }
+
+    /* PREVIEW FRAME (DƯỚI 5 HÀNG NÚT, KÍCH THƯỚC BẰNG NHAU CHO CẢ VIDEO & ẢNH) */
+    .preview-section { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+    .preview-header-label { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: var(--text-muted); font-weight: 700; padding: 0 2px; }
+    .preview-box { width: 100%; height: 260px; background: #050811; border-radius: 14px; border: 1px solid var(--border); overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+    .preview-box iframe { width: 100%; height: 100%; border: none; border-radius: 14px; }
+    .preview-box img { width: 100%; height: 100%; object-fit: contain; cursor: zoom-in; }
+    .preview-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); padding: 16px; text-align: center; }
+    .preview-placeholder .icon { font-size: 38px; }
+    .preview-placeholder .hint { font-size: 11.5px; color: #64748b; }
+
+    /* LIST & SEARCH SECTION (DƯỚI CÙNG) */
+    .list-section { padding: 12px 14px 16px 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; background: rgba(11, 17, 32, 0.5); }
+    .search-input { width: 100%; background: #090d16; border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; font-size: 13px; color: #fff; outline: none; transition: border-color 0.2s; }
+    .search-input:focus { border-color: var(--primary); }
+
+    .filter-chips { display: flex; gap: 6px; overflow-x: auto; }
+    .filter-chip { background: #090d16; border: 1px solid var(--border); color: var(--text-muted); font-size: 11.5px; font-weight: 800; padding: 6px 12px; border-radius: 18px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .filter-chip.active { background: var(--primary); color: #000; border-color: var(--primary); }
+    .filter-chip.chip-pending.active { background: #ef4444; color: #fff; border-color: #ef4444; }
+    .filter-chip.chip-done.active { background: #10b981; color: #000; border-color: #10b981; }
+
+    .table-container { max-height: 240px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; background: #090d16; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { background: #131d31; padding: 8px 10px; text-align: left; color: var(--text-muted); font-size: 11px; font-weight: 800; position: sticky; top: 0; border-bottom: 1px solid var(--border); }
+    td { padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer; vertical-align: middle; }
+    tr:hover { background: rgba(255,255,255,0.04); }
+    tr.active { background: rgba(245, 158, 11, 0.15); font-weight: 700; }
+    .badge-status { font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 6px; }
+    .badge-status.pending { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .badge-status.done { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: #000; font-weight: 900; font-size: 13px; padding: 10px 22px; border-radius: 20px; z-index: 999; display: none; box-shadow: 0 6px 20px rgba(0,0,0,0.6); }
+
+    /* LIGHTBOX */
+    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 14px; }
+    .lightbox img { max-width: 100%; max-height: 92vh; border-radius: 12px; object-fit: contain; }
+      .btn-copy-aff { background: rgba(234, 179, 8, 0.16); border: 1px solid rgba(234, 179, 8, 0.42); color: #fde047; }
+    .btn-copy-aff:hover { background: rgba(234, 179, 8, 0.27); }
+    .btn-link-aff { background: rgba(16, 185, 129, 0.16); border: 1px solid rgba(16, 185, 129, 0.42); color: #34d399; }
+    .btn-link-aff:hover { background: rgba(16, 185, 129, 0.27); }
+    .btn-mark-posted { width: 100%; height: 46px; border-radius: 13px; font-size: 13.5px; }
+</style>
+</head>
+<body>
+  <div class="app-container">
+    <header>
+      <div class="brand-wrap">
+        <img src="Avatar.png" class="brand-avatar" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><circle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23f59e0b\'/><text x=\'50\' y=\'60\' font-size=\'40\' text-anchor=\'middle\' fill=\'white\'>PH</text></svg>'">
+        <div>
+          <h1 class="header-title">PHÚC HỌC ĐIỀU HAY</h1>
+          <div class="header-subtitle">Trạm Đăng Bài Mobile • Cả Video & Ảnh Dạy Con</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- SWITCH 2 TAB CHÍNH -->
+    <div class="tab-switcher">
+      <button class="tab-btn active" id="tabVideoBtn" onclick="switchTab('video')">🎬 ĐĂNG VIDEO (<span id="vCount">0</span>)</button>
+      <button class="tab-btn tab-img" id="tabImageBtn" onclick="switchTab('image')">📸 ĐĂNG ẢNH (<span id="iCount">0</span>)</button>
+    </div>
+
+    <!-- STATS & PROGRESS BAR -->
+    <div class="stats-bar">
+      <span id="statText">Đang tải...</span>
+      <span id="statPercent">0%</span>
+    </div>
+    <div style="padding: 0 14px;"><div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div></div>
+
+    <!-- ACTIVE CARD -->
+    <div class="current-card">
+      <div class="card-top">
+        <div class="stt-group">
+          <span class="badge-stt" id="currStt">#---</span>
+          <span class="badge-category" id="currCategory">Phúc Học Điều Hay</span>
+        </div>
+        <div class="nav-buttons">
+          <button class="btn-nav" onclick="prevItem()" title="Bài trước">⬅️ Trước</button>
+          <button class="btn-nav" onclick="nextItem()" title="Bài tiếp theo">Sau ➡️</button>
+        </div>
+      </div>
+
+      <div class="current-title" id="currTitle">Đang nạp bài viết...</div>
+
+      <!-- 5 HÀNG NÚT BẤM CÂN XỨNG -->
+      <div class="actions-grid">
+        <!-- HÀNG 1: XEM DRIVE (TRÊN KHUNG XEM) & TẢI VỀ MÁY -->
+        <div class="btn-row-2col">
+          <button class="btn-act btn-view-drive" id="btnViewDrive" onclick="triggerViewInFrame()">
+            <span>👁️ Xem Drive</span>
+          </button>
+          <button class="btn-act btn-download-drive" id="btnDownloadDrive" onclick="triggerDownloadDrive()">
+            <span id="lblDownloadDrive">📥 Tải Drive</span>
+          </button>
+        </div>
+
+        <!-- HÀNG 2: CAPTION FACEBOOK & BÌNH LUẬN -->
+        <div class="btn-row-2col">
+          <button class="btn-act btn-copy-fb" onclick="copyCurrentField('facebook', 'Caption Facebook')">
+            <span>📘 Caption Facebook</span>
+          </button>
+          <button class="btn-act btn-copy-pinned" onclick="copyCurrentField('pinnedComment', 'Bình Luận')">
+            <span>📌 Bình Luận</span>
+          </button>
+        </div>
+
+        <!-- HÀNG 3: CAPTION TIKTOK & CAPTION ZALO -->
+        <div class="btn-row-2col">
+          <button class="btn-act btn-copy-tiktok" onclick="copyCurrentField('tiktok', 'Caption TikTok')">
+            <span>🎵 Caption TikTok</span>
+          </button>
+          <button class="btn-act btn-copy-zalo" onclick="copyCurrentField('zalo', 'Caption Zalo')">
+            <span>💬 Caption Zalo</span>
+          </button>
+        </div>
+
+        <!-- HÀNG 4: CAPTION YOUTUBE & MÔ TẢ YOUTUBE (HOẶC INSTA & PROMPT AI Ở TAB ẢNH) -->
+        <div class="btn-row-2col">
+          <button class="btn-act btn-copy-yt-title" id="btnRow4Col1" onclick="copyRow4Col1()">
+            <span id="lblRow4Col1">▶️ Caption YouTube</span>
+          </button>
+          <button class="btn-act btn-copy-yt-desc" id="btnRow4Col2" onclick="copyRow4Col2()">
+            <span id="lblRow4Col2">📄 Mô Tả YouTube</span>
+          </button>
+        </div>
+
+        <!-- HÀNG 5: NÚT ĐÁNH DẤU ĐÃ ĐĂNG - DÀI, MÀU ĐỎ NỔI BẬT -->
+        <div class="btn-row-2col">
+  <button class="btn-act btn-link-aff" id="btnCopyAffiliateLink" onclick="copyAffiliateLink()">
+    <span>🔗 Link AFF</span>
+  </button>
+  <button class="btn-act btn-copy-aff" id="btnCopyAffiliate" onclick="copyAffiliateSuggestions()">
+    <span>🛒 Gợi ý AFF</span>
+  </button>
+</div>
+<button class="btn-mark-posted state-pending" id="btnMarkPosted" onclick="toggleCurrentDone()">
+  <span id="lblMarkPosted">🔴 ĐÃ ĐĂNG BÀI</span>
+</button>
+      </div>
+
+      <!-- KHUNG XEM TRỰC TIẾP VIDEO & ẢNH (ĐẶT DƯỚI 5 HÀNG NÚT, KÍCH THƯỚC BẰNG NHAU) -->
+      <div class="preview-section">
+        <div class="preview-header-label">
+          <span id="previewTypeLabel">Khung Xem Trực Tiếp:</span>
+          <span id="previewActionHint" style="font-size:11px;color:#38bdf8;cursor:pointer;" onclick="openDriveExternalTab()">Mở tab Drive ↗</span>
+        </div>
+        <div class="preview-box" id="previewMediaBox">
+          <!-- Video Iframe hoặc Thẻ Img sẽ được render tại đây -->
+        </div>
+      </div>
+    </div>
+
+    <!-- LIST & SEARCH SECTION (DƯỚI CÙNG - MẶC ĐỊNH LỌC CHƯA ĐĂNG) -->
+    <div class="list-section">
+      <div class="filter-chips">
+        <button class="filter-chip chip-pending active" id="chipPending" onclick="setFilter('pending')">⏳ Chưa đăng (<span id="countPending">0</span>)</button>
+        <button class="filter-chip chip-done" id="chipDone" onclick="setFilter('done')">✅ Đã đăng (<span id="countDone">0</span>)</button>
+        <button class="filter-chip" id="chipAll" onclick="setFilter('all')">Tất cả (<span id="countAll">0</span>)</button>
+      </div>
+
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Tìm theo STT (#1) hoặc từ khóa..." oninput="renderTable()">
+
+      <div class="table-container">
+        <table>
+          <thead><tr><th style="width:46px;">STT</th><th>Tiêu đề bài viết</th><th style="width:75px;">Trạng thái</th></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastMsg">✓ Đã sao chép!</div>
+  <div class="lightbox" id="lightbox" onclick="this.style.display='none'"><img id="lightboxImg" src=""></div>
+
+  <script>
+    var VIDEO_ITEMS = [{"stt":1,"category":"A","title":"A","status":"Đã làm video","videoUrl":"B","youtubeTitle":"https://drive.google.com/file/d/1TUqPcGXErDQh7c7IBBuKFa7vS3xSbnqh/view?usp=drive_link","youtubeDesc":"","tiktok":"","facebook":"Miệng thì bảo không quan trọng, nhưng thử đặt đúng chỗ xem có gật lia lịa không? Chị em nhà mình có ai dũng cảm nhận vụ này không ta? 🤭\n \n #ngatamsu #chuyenphongthe #phunu #chuyenvochong #tamly\n\n#phuchocdieuhay #baihoccuocsong #daycon #giadinh #songtute","zalo":"","instagram":"","pinnedComment":"","affiliateSuggestions":"","productLink":""}];
+    var IMAGE_ITEMS = [];
+    var WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxHjQnvn-CTcUHWU3qE0lRw2oP11T9_h9gAHk6Ug2xLBrXrHpwnD7_NqfLAJZRka16X/exec";
+
+    var currentTab = "video";
+    var currentIndex = 0;
+    var currentFilter = "pending"; // MẶC ĐỊNH LUÔN LÀ CHƯA ĐĂNG THEO YÊU CẦU
+    var doneStorage = JSON.parse(localStorage.getItem("phuc_done_items") || "{}");
+
+    function getItems() {
+      return currentTab === "video" ? VIDEO_ITEMS : IMAGE_ITEMS;
+    }
+
+    function getItemKey(item) {
+      return currentTab + "_" + (item ? item.stt : 0);
+    }
+
+    function isDone(item) {
+      if (!item) return false;
+      var k = getItemKey(item);
+      if (doneStorage[k] !== undefined) return doneStorage[k];
+      return String(item.status || "").toLowerCase().indexOf("đã đăng") !== -1;
+    }
+
+    function extractDriveId(url) {
+      if (!url) return "";
+      var s = String(url).trim();
+      var m = s.match(/\/d\/([a-zA-Z0-9_-]{25,})/);
+      if (m && m[1]) return m[1];
+      var m2 = s.match(/id=([a-zA-Z0-9_-]{25,})/);
+      if (m2 && m2[1]) return m2[1];
+      if (/^[a-zA-Z0-9_-]{25,}$/.test(s)) return s;
+      return "";
+    }
+
+    function switchTab(t) {
+      currentTab = t;
+      document.getElementById("tabVideoBtn").classList.toggle("active", t === "video");
+      document.getElementById("tabImageBtn").classList.toggle("active", t === "image");
+
+      // Cập nhật nhãn nút Hàng 4 phù hợp với Tab
+      if (t === "video") {
+        document.getElementById("lblRow4Col1").innerText = "▶️ Caption YouTube";
+        document.getElementById("lblRow4Col2").innerText = "📄 Mô Tả YouTube";
+        document.getElementById("lblDownloadDrive").innerText = "📥 Tải Video";
+        document.getElementById("previewTypeLabel").innerText = "Khung Xem Video Drive:";
+      } else {
+        document.getElementById("lblRow4Col1").innerText = "📸 Caption Insta";
+        document.getElementById("lblRow4Col2").innerText = "🎨 Prompt AI";
+        document.getElementById("lblDownloadDrive").innerText = "📥 Tải Ảnh";
+        document.getElementById("previewTypeLabel").innerText = "Khung Xem Ảnh Gốc:";
+      }
+
+      // Luôn đưa về bài chưa đăng đầu tiên của tab đó
+      findAndSetFirstPendingIndex();
+      loadCurrentItem();
+      renderTable();
+      updateStats();
+    }
+
+    function findAndSetFirstPendingIndex() {
+      var items = getItems();
+      for (var i = 0; i < items.length; i++) {
+        if (!isDone(items[i])) {
+          currentIndex = i;
+          return;
+        }
+      }
+      currentIndex = 0;
+    }
+
+    function loadCurrentItem() {
+      var items = getItems();
+      if (!items || items.length === 0) {
+        document.getElementById("currStt").innerText = "#0";
+        document.getElementById("currCategory").innerText = "Chưa có dữ liệu";
+        document.getElementById("currTitle").innerText = "Chưa có bài viết nào trong tab này";
+        document.getElementById("previewMediaBox").innerHTML = "<div class='preview-placeholder'><span class='icon'>📁</span><span>Không có dữ liệu</span></div>";
+        return;
+      }
+
+      if (currentIndex < 0) currentIndex = 0;
+      if (currentIndex >= items.length) currentIndex = items.length - 1;
+
+      var it = items[currentIndex];
+      document.getElementById("currStt").innerText = "#" + it.stt;
+      document.getElementById("currCategory").innerText = it.category || "Phúc Học Điều Hay";
+      document.getElementById("currTitle").innerText = it.title;
+
+      // Cập nhật Nút Đánh Dấu Đã Đăng (Hàng 5)
+      var d = isDone(it);
+      var btnMark = document.getElementById("btnMarkPosted");
+      var lblMark = document.getElementById("lblMarkPosted");
+
+      if (d) {
+        btnMark.className = "btn-mark-posted state-done";
+        lblMark.innerText = "✅ ĐÃ ĐĂNG (Hoàn tác)";
+      } else {
+        btnMark.className = "btn-mark-posted state-pending";
+        lblMark.innerText = "🔴 ĐÁNH DẤU: ĐÃ ĐĂNG BÀI";
+      }
+
+      // TỰ ĐỘNG NẠP VÀO KHUNG XEM TRỰC TIẾP
+      renderPreviewMedia(it);
+    }
+
+    function renderPreviewMedia(it) {
+      var box = document.getElementById("previewMediaBox");
+      box.innerHTML = "";
+
+      if (currentTab === "video") {
+        var vidUrl = it.videoUrl || it.zipUrl || "";
+        var fileId = extractDriveId(vidUrl);
+
+        if (fileId) {
+          var previewSrc = "https://drive.google.com/file/d/" + fileId + "/preview";
+          var iframe = document.createElement("iframe");
+          iframe.src = previewSrc;
+          iframe.allow = "autoplay; fullscreen";
+          iframe.setAttribute("allowfullscreen", "true");
+          box.appendChild(iframe);
+        } else {
+          box.innerHTML = "<div class='preview-placeholder'><span class='icon'>🎬</span><b>Chưa có link video Drive</b><span class='hint'>Hãy cập nhật cột 'Link Video Drive' trong sheet</span></div>";
+        }
+      } else {
+        // TAB ẢNH - TUYỆT ĐỐI KHÔNG DÙNG AVATAR
+        var imgUrl = it.imageUrl || ("Image/A (" + it.stt + ").jpg");
+        var imgId = extractDriveId(imgUrl);
+        var directImgSrc = imgId ? ("https://lh3.googleusercontent.com/d/" + imgId) : imgUrl;
+
+        var img = document.createElement("img");
+        img.src = directImgSrc;
+        img.title = "Nhấp để phóng to toàn màn hình";
+        img.onclick = function() { openLightbox(this.src); };
+        img.onerror = function() {
+          if (imgId && this.src.indexOf("googleusercontent") !== -1) {
+            this.src = "https://drive.google.com/thumbnail?id=" + imgId + "&sz=w1000";
+          } else {
+            box.innerHTML = "<div class='preview-placeholder'><span class='icon'>📸</span><b>Không thể tải trước ảnh</b><span class='hint'>Bấm 'Tải Drive' để tải ảnh gốc</span></div>";
+          }
+        };
+        box.appendChild(img);
+      }
+    }
+
+    function triggerViewInFrame() {
+      var it = getItems()[currentIndex];
+      if (!it) return;
+      renderPreviewMedia(it);
+      showToast("👁️ Đang mở trình phát trong khung xem!");
+    }
+
+    function triggerDownloadDrive() {
+      var it = getItems()[currentIndex];
+      if (!it) return;
+      var rawUrl = (currentTab === "video") ? (it.videoUrl || it.zipUrl) : it.imageUrl;
+      var fileId = extractDriveId(rawUrl);
+
+      if (fileId) {
+        var dlUrl = "https://drive.google.com/uc?export=download&id=" + fileId;
+        window.open(dlUrl, "_blank");
+        showToast("📥 Đang tải file từ Google Drive...");
+      } else if (rawUrl && rawUrl.indexOf("http") === 0) {
+        window.open(rawUrl, "_blank");
+      } else {
+        showToast("⚠️ Chưa có URL Google Drive cho bài này!");
+      }
+    }
+
+    function openDriveExternalTab() {
+      var it = getItems()[currentIndex];
+      if (!it) return;
+      var rawUrl = (currentTab === "video") ? (it.videoUrl || it.zipUrl) : it.imageUrl;
+      if (rawUrl && rawUrl.indexOf("http") === 0) {
+        window.open(rawUrl, "_blank");
+      } else {
+        showToast("⚠️ Chưa có đường link Google Drive!");
+      }
+    }
+
+    function copyAffiliateLink() {
+      if (currentTab !== "video") { showToast("⚠️ Link AFF chỉ áp dụng cho video"); return; }
+      var it = getItems()[currentIndex];
+      var url = it && it.productLink ? String(it.productLink).trim() : "";
+      if (!/^https?:\/\//i.test(url)) { showToast("⚠️ Chưa có Link AFF cho video này"); return; }
+      copyText(url, "Link AFF");
+    }
+
+    function copyAffiliateSuggestions() {
+      if (currentTab !== "video") { showToast("⚠️ Gợi ý AFF chỉ áp dụng cho video"); return; }
+      copyCurrentField("affiliateSuggestions", "Gợi Ý Sản Phẩm AFF");
+    }
+
+    function copyCurrentField(key, label) {
+      var it = getItems()[currentIndex];
+      if (!it) return;
+      var txt = it[key] || "";
+      if (!txt) {
+        showToast("⚠️ Chưa có nội dung " + label);
+        return;
+      }
+      copyText(txt, label);
+    }
+
+    function copyRow4Col1() {
+      var it = getItems()[currentIndex];
+      if (!it) return;
+      if (currentTab === "video") {
+        copyCurrentField("youtubeTitle", "Tiêu Đề YouTube");
+      } else {
+        copyCurrentField("tiktok", "Caption Instagram");
+      }
+    }
+
+    function copyRow4Col2() {
+      var it = getItems()[currentIndex];
+      if (!it) return;
+      if (currentTab === "video") {
+        copyCurrentField("youtubeDesc", "Mô Tả YouTube");
+      } else {
+        copyCurrentField("prompt", "Prompt AI Tạo Ảnh");
+      }
+    }
+
+    function nextItem() {
+      var items = getItems();
+      if (currentIndex < items.length - 1) {
+        currentIndex++;
+        loadCurrentItem();
+        renderTable();
+      } else {
+        showToast("Đã đến bài cuối cùng!");
+      }
+    }
+
+    function prevItem() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadCurrentItem();
+        renderTable();
+      } else {
+        showToast("Đang ở bài đầu tiên!");
+      }
+    }
+
+    function toggleCurrentDone() {
+      var it = getItems()[currentIndex];
+      if (!it) return;
+      var k = getItemKey(it);
+      var currentDone = isDone(it);
+      var newDone = !currentDone;
+
+      doneStorage[k] = newDone;
+      localStorage.setItem("phuc_done_items", JSON.stringify(doneStorage));
+
+      // Đồng bộ 2 chiều về Google Sheet
+      if (WEB_APP_URL && WEB_APP_URL.indexOf("http") === 0) {
+        var syncUrl = WEB_APP_URL + "?action=markPosted&type=" + currentTab + "&stt=" + it.stt + "&title=" + encodeURIComponent(it.title) + "&isDone=" + newDone;
+        fetch(syncUrl, { mode: "no-cors" }).catch(function(){});
+      }
+
+      if (newDone) {
+        showToast("✅ Đã chuyển sang: ĐÃ ĐĂNG BÀI");
+        // Khi ở bộ lọc "Chưa đăng", tự động chuyển sang bài chưa đăng tiếp theo
+        if (currentFilter === "pending") {
+          findAndSetFirstPendingIndex();
+        }
+      } else {
+        showToast("⚪ Đã chuyển lại: CHƯA ĐĂNG");
+      }
+
+      loadCurrentItem();
+      renderTable();
+      updateStats();
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll(".filter-chip").forEach(function(c) { c.classList.remove("active"); });
+      if (f === "pending") document.getElementById("chipPending").classList.add("active");
+      else if (f === "done") document.getElementById("chipDone").classList.add("active");
+      else document.getElementById("chipAll").classList.add("active");
+
+      // Nếu bài hiện tại không thuộc bộ lọc mới, nhảy về bài đầu tiên thỏa mãn
+      var items = getItems();
+      var validIndex = -1;
+      for (var i = 0; i < items.length; i++) {
+        var d = isDone(items[i]);
+        if (f === "all" || (f === "pending" && !d) || (f === "done" && d)) {
+          validIndex = i;
+          break;
+        }
+      }
+      if (validIndex !== -1) {
+        currentIndex = validIndex;
+        loadCurrentItem();
+      }
+
+      renderTable();
+    }
+
+    function renderTable() {
+      var q = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+      var items = getItems();
+      var tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+
+      items.forEach(function(it, idx) {
+        var d = isDone(it);
+        if (currentFilter === "pending" && d) return;
+        if (currentFilter === "done" && !d) return;
+
+        var sttMatch = ("#" + it.stt).toLowerCase().indexOf(q) !== -1;
+        var titleMatch = it.title.toLowerCase().indexOf(q) !== -1;
+        if (q && !sttMatch && !titleMatch) return;
+
+        var tr = document.createElement("tr");
+        if (idx === currentIndex) tr.className = "active";
+        tr.onclick = function() {
+          currentIndex = idx;
+          loadCurrentItem();
+          renderTable();
+          window.scrollTo({ top: 120, behavior: "smooth" });
+        };
+
+        tr.innerHTML = 
+          '<td><b>#' + it.stt + '</b></td>' +
+          '<td>' + it.title + '</td>' +
+          '<td><span class="badge-status ' + (d ? "done" : "pending") + '">' + (d ? "Đã đăng" : "Chưa") + '</span></td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateStats() {
+      var items = getItems();
+      var total = items.length;
+      var doneCount = 0;
+      var pendingCount = 0;
+
+      items.forEach(function(it) {
+        if (isDone(it)) doneCount++;
+        else pendingCount++;
+      });
+
+      document.getElementById("vCount").innerText = VIDEO_ITEMS.length;
+      document.getElementById("iCount").innerText = IMAGE_ITEMS.length;
+
+      document.getElementById("countPending").innerText = pendingCount;
+      document.getElementById("countDone").innerText = doneCount;
+      document.getElementById("countAll").innerText = total;
+
+      var pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
+      document.getElementById("statText").innerText = "Đã đăng: " + doneCount + " / " + total;
+      document.getElementById("statPercent").innerText = pct + "%";
+      document.getElementById("progressBar").style.width = pct + "%";
+    }
+
+    function copyText(txt, label) {
+      if (!txt) {
+        showToast("⚠️ Nội dung trống");
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function() {
+          showToast("✓ Đã sao chép: " + label);
+        }).catch(function() {
+          fallbackCopy(txt, label);
+        });
+      } else {
+        fallbackCopy(txt, label);
+      }
+    }
+
+    function fallbackCopy(txt, label) {
+      var t = document.createElement("textarea");
+      t.value = txt;
+      t.style.position = "fixed";
+      t.style.opacity = "0";
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand("copy");
+      document.body.removeChild(t);
+      showToast("✓ Đã sao chép: " + label);
+    }
+
+    function showToast(m) {
+      var t = document.getElementById("toastMsg");
+      t.innerText = m;
+      t.style.display = "block";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(function() { t.style.display = "none"; }, 1800);
+    }
+
+    function openLightbox(src) {
+      document.getElementById("lightboxImg").src = src;
+      document.getElementById("lightbox").style.display = "flex";
+    }
+
+    // KHỞI ĐỘNG MẶC ĐỊNH LÀ VIDEO & CHƯA ĐĂNG
+    switchTab("video");
+  </script>
+</body>
+</html>
